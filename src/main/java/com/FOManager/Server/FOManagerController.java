@@ -1,4 +1,5 @@
 package com.FOManager.Server;
+import java.util.ArrayList;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,15 @@ import com.FOManager.Server.Models.FOModel;
 
 @RestController
 public class FOManagerController {
-	@PostMapping("api/FOManager/add")	
-	ResponseEntity<ApiResultModel<FOModel>> Add(@RequestBody AddFOModel model) {
-        ApiResultModel<FOModel> result = new ApiResultModel<FOModel>();
-		HttpStatus responseStatus = HttpStatus.OK;
-        
-        if (model.UserId != 1)
-        {
-            result.ErrorMessage = "The user does not exist.";
-			responseStatus = HttpStatus.BAD_REQUEST;
+	List<AddFOModel> mockFinanceOperations = new ArrayList<AddFOModel>();
+	@PostMapping("/add")	
+	ApiResultModel AddFO(@RequestBody AddFOModel model) {
+		ApiResultModel result = new ApiResultModel();
+		if(model != null) {
+			mockFinanceOperations.add(model);
+			result.success = true;
+		}
+		return result;
         } else {
 	        result.Success = true;
 	        result.Result = new FOModel();
