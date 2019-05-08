@@ -1,4 +1,4 @@
-package com.FOManager.Server;
+package com.FOManager.Server.Models;
 
 public class FOModel{
     public int Id;
