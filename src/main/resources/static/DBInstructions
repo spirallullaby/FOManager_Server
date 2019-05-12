@@ -1,0 +1,43 @@
+1. Install PostgreSQL.
+
+2. Install PostgreSQL OLDB driver.
+
+3. Add the bin path of PostgreSQL to PATH environmental variable.
+
+4. Open CMD:
+
+5. Connect to PostgreSQL with CMD/PowerShell:
+psql -U postgres
+
+6. Type the password (hidden)
+
+7. Create database in PostgreSQL and connect to it.
+CREATE DATABASE fomanagerdb;
+\c fomanagerdb
+
+8. Create tables:
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY NOT NULL,
+    email_address VARCHAR (100) UNIQUE NOT NULL,
+    password VARCHAR (100) NOT NULL
+);
+
+CREATE TABLE finance_operations (
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    sum DECIMAL (18,2) NOT NULL,
+);
+
+
+
+DROP TABLE finance_operations;
+DROP TABLE users;
+
+
+9. Queries:
+Insert user:
+    insert into users (email_address, "password") values ($email_address, $password);
+
+Log in user:
+    select id, email_address from public.users where email_address = $email_address;
+    select id, email_address from public.users where email_address = $email_address and "password" = $password;
