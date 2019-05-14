@@ -6,4 +6,5 @@ public class ApiResultModel<T> {
     public String ErrorMessage = "";
 
     public T Result;
+
 }

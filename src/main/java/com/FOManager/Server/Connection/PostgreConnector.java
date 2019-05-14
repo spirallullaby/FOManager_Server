@@ -8,7 +8,8 @@ import java.util.Properties;
 public class PostgreConnector {
 	private static Connection conn = null;
 	//connection properties 
-	private static String url = "jdbc:postgresql://localhost:5432/fomanagerdb";
+	private static String dbName = "postgres";
+	private static String url = "jdbc:postgresql://localhost:5432/" + dbName;
 	private static String username = "postgres";
 	private static String password = "qwerty1@";
 	

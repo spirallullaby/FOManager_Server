@@ -7,7 +7,7 @@ public class DBConstants {
 		public static String user_id = "user_id";
 		public static String sum = "sum";
 		public static String description = "description";
-		public static String datetime = "datetime";
+		public static String date = "date";
 	}
 	
 	public static class UserTable {
