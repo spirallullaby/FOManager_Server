@@ -20,18 +20,30 @@ import com.FOManager.Server.Models.FOModel;
 public class FOManagerController {
 	List<AddFOModel> mockFinanceOperations = new ArrayList<AddFOModel>();
 
-	@PostMapping("/add")
-	ApiResultModel AddFO(@RequestBody AddFOModel model) {
-		ApiResultModel result = new ApiResultModel<AddFOModel>();
+	@PostMapping("api/FOManager/add")
+	ResponseEntity<ApiResultModel<FOModel>> AddFO(@RequestBody AddFOModel model) {
+		ApiResultModel<FOModel> result = new ApiResultModel<FOModel>();
+		HttpStatus responseStatus = HttpStatus.OK;
+		
 		if (model != null) {
 			FinanceOperationActions foActions = new FinanceOperationActions();
 			Boolean insertRes = foActions.InsertFO(model);
-			result.Success = insertRes;
-			result.Result = model;
+			if (insertRes) {
+				result.Success = true;
+				result.Result = new FOModel();
+				result.Result.UserId = model.UserId;
+				result.Result.Sum = model.Sum;
+				result.Result.Description = model.Description;
+			} else {
+				result.ErrorMessage = "There was problem inserting the model in the database!";
+				responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			}
 		} else {
-			result.Success = false;
+			result.ErrorMessage = "The model is empty!";
+			responseStatus = HttpStatus.BAD_REQUEST;
 		}
-		return result;
+
+		return new ResponseEntity<ApiResultModel<FOModel>>(result, responseStatus);
 	}
 
 	@GetMapping("api/FOManager/exportHistory")

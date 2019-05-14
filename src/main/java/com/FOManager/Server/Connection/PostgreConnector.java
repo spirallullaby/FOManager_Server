@@ -8,16 +8,16 @@ import java.util.Properties;
 public class PostgreConnector {
 	private static Connection conn = null;
 	//connection properties 
-	private static String url = "jdbc:postgresql://localhost:5432";
+	private static String url = "jdbc:postgresql://localhost:5432/fomanagerdb";
 	private static String username = "postgres";
 	private static String password = "qwerty1@";
 	
 	public static Connection getConnection() throws SQLException {
 		if(conn == null) {
-		Properties props = new Properties();
-		props.setProperty("user", username);
-		props.setProperty("password", password);
-		conn = DriverManager.getConnection(url, props);
+			Properties props = new Properties();
+			props.setProperty("user", username);
+			props.setProperty("password", password);
+			conn = DriverManager.getConnection(url, props);
 		}
 		return conn;
 	}

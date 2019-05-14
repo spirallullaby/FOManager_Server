@@ -2,10 +2,13 @@ package com.FOManager.Server;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.FOManager.Server.Connection.UserActions;
 import com.FOManager.Server.Models.ApiResultModel;
 import com.FOManager.Server.Models.LoginModel;
 import com.FOManager.Server.Models.SignUpModel;
@@ -50,5 +53,12 @@ public class UserController {
 		}
 		
 		return new ResponseEntity<ApiResultModel<UserModel>>(result, responseStatus);
+	}
+	
+	@GetMapping("api/user/test")
+	String Test(@RequestParam Integer user_id) {
+		UserActions userActions = new UserActions();
+		userActions.GetUserById(user_id);
+		return "Test";
 	}
 }
