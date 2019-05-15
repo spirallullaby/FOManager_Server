@@ -1,7 +1,5 @@
 package com.FOManager.Server.Models;
 
-import java.util.Calendar;
-
 public class FOModel{
     public int Id;
 

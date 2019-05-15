@@ -6,49 +6,88 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.FOManager.Server.Models.LoginModel;
+import com.FOManager.Server.Models.SignUpModel;
 import com.FOManager.Server.Models.UserModel;
 
 public class UserActions {
-	public UserModel InsertUser(LoginModel model) {
-		String insertStatement = "insert into {0} ({1},{2}) values ('{3}','{4}')";
-		insertStatement = insertStatement.replace("{0}", DBConstants.UserTable.name);
-		insertStatement = insertStatement.replace("{1}", DBConstants.UserTable.email_address);
-		insertStatement = insertStatement.replace("{2}", DBConstants.UserTable.password);
-		insertStatement = insertStatement.replace("{3}", model.EmailAddress);
-		insertStatement = insertStatement.replace("{4}", model.Password);
-		try {
-			Connection conn = PostgreConnector.getConnection();
-			PreparedStatement statement = conn.prepareStatement(insertStatement);
-			statement.executeQuery();
-			return null;
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public void GetUserById(int user_id) {
-		String selectStatement = "select {0}, {1} from {2} where {3} = {4}";
-		selectStatement = selectStatement.replace("{0}", DBConstants.UserTable.id);
-		selectStatement = selectStatement.replace("{1}", DBConstants.UserTable.email_address);
-		selectStatement = selectStatement.replace("{2}", DBConstants.UserTable.name);
-		selectStatement = selectStatement.replace("{3}", DBConstants.UserTable.id);
-		selectStatement = selectStatement.replace("{4}", Integer.toString(user_id));
+	public UserModel GetUser(LoginModel model) {
+		UserModel resultModel = null;
+		String selectStatement = String.format("select %s, %s from %s where %s = '%s' and \"%s\" = '%s';",
+				DBConstants.UserTable.id,
+				DBConstants.UserTable.email_address, 
+				DBConstants.UserTable.name, 
+				DBConstants.UserTable.email_address,
+				model.EmailAddress,
+				DBConstants.UserTable.password,
+				model.Password);
+		
 		try {
 			Connection conn = PostgreConnector.getConnection();
 			PreparedStatement statement = conn.prepareStatement(selectStatement);
-			ResultSet  rs = statement.executeQuery();
-			while (rs.next())
-			{
-			    System.out.print("Column 1 returned ");
-			    System.out.println(rs.getString(1));
+			ResultSet  resultSet = statement.executeQuery();
+			if (resultSet.next()) {
+				resultModel = new UserModel();
+				resultModel.Id = resultSet.getInt(DBConstants.UserTable.id);
+				resultModel.EmailAddress = resultSet.getString(DBConstants.UserTable.email_address);
 			}
-			rs.close();
-			statement.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return resultModel;
+	}
+	
+	public Boolean UserWithEmailExists(String email_address) {
+		String selectStatement = String.format("select %s from %s where %s = '%s';",
+				DBConstants.UserTable.id,
+				DBConstants.UserTable.name, 
+				DBConstants.UserTable.email_address,
+				email_address);
+		
+		try {
+			Connection conn = PostgreConnector.getConnection();
+			PreparedStatement statement = conn.prepareStatement(selectStatement);
+			ResultSet  resultSet = statement.executeQuery();
+			if (resultSet.next()) {
+				return true;
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	public UserModel InsertUser(SignUpModel model) {
+		UserModel resultModel = null;
+		String insertStatement = String.format("insert into %s (%s,\"%s\") values ('%s','%s');",
+				DBConstants.UserTable.name,
+				DBConstants.UserTable.email_address,
+				DBConstants.UserTable.password,
+				model.EmailAddress,
+				model.Password);
+		String selectStatement = String.format("select %s, %s from %s where %s = '%s';",
+				DBConstants.UserTable.id,
+				DBConstants.UserTable.email_address,
+				DBConstants.UserTable.name,
+				DBConstants.UserTable.email_address,
+				model.EmailAddress);
+		
+		try {
+			Connection conn = PostgreConnector.getConnection();
+			PreparedStatement statement = conn.prepareStatement(insertStatement);
+			statement.execute();
+			
+			statement = conn.prepareStatement(selectStatement);
+			ResultSet resultSet = statement.executeQuery();
+			if (resultSet.next()) {
+				resultModel = new UserModel();
+				resultModel.Id = resultSet.getInt(DBConstants.UserTable.id);
+				resultModel.EmailAddress = resultSet.getString(DBConstants.UserTable.email_address);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return resultModel;
 	}
 }
