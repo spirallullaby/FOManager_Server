@@ -1,7 +1,6 @@
 package com.FOManager.Server.Connection;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +8,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -23,9 +21,27 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.io.IOException;
+import java.util.Properties;
+
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 public class FinanceOperationActions {
-	private static final String CSV_FILE_PATH = "./history.csv";
+	private static final String CSV_FILE_PATH = "./history";
+	private static final String CSV_EXTENSION = ".csv";
 
 	public Boolean InsertFO(AddFOModel model) {
 		String date = String.format("%s-%s-%s", model.Date.getYear(), model.Date.getMonth(), model.Date.getDate());
@@ -85,10 +101,17 @@ public class FinanceOperationActions {
 		return result;
 	}
 
-	public Boolean emailHistory(ExtractOperationsModel model) throws IOException {
+	public Boolean emailHistory(ExtractOperationsModel model) throws IOException, AddressException, MessagingException {
 		Boolean result = true;
+		String path = generateCSV(model);
+		sendMail(path, model.UserId);
+		return result;
+	}
+
+	private String generateCSV(ExtractOperationsModel model) throws IOException {
 		List<FOModel> history = GetFinanceOperations(model);
-		Writer writer = Files.newBufferedWriter(Paths.get(CSV_FILE_PATH));
+		String path = CSV_FILE_PATH + model.UserId + CSV_EXTENSION;
+		Writer writer = Files.newBufferedWriter(Paths.get(path));
 
 		CSVWriter csvWriter = new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
@@ -101,6 +124,58 @@ public class FinanceOperationActions {
 		}
 		csvWriter.writeNext(new String[] { "", "Total:", Double.toString(total) });
 		csvWriter.close();
-		return result;
+		return path;
+	}
+
+	private void sendMail(String path, int userId) throws AddressException, MessagingException {
+		final String username = "noreply.weblibrary@gmail.com";
+		final String password = "asdf123~";
+
+		Properties prop = new Properties();
+		prop.put("mail.smtp.host", "smtp.gmail.com");
+		prop.put("mail.smtp.port", "587");
+		prop.put("mail.smtp.auth", "true");
+		prop.put("mail.smtp.starttls.enable", "true"); // TLS
+
+		Session session = Session.getInstance(prop, new javax.mail.Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(username, password);
+			}
+		});
+		
+		UserActions ua = new UserActions();
+		String recipient = ua.getUserEmail(userId);
+		
+		Message message = new MimeMessage(session);
+		message.setFrom(new InternetAddress("noreply.weblibrary@gmail.com"));
+		message.setRecipients(Message.RecipientType.TO,
+				InternetAddress.parse(recipient));
+		message.setSubject("History export");
+		
+        // Create the message part
+        BodyPart messageBodyPart = new MimeBodyPart();
+
+        // Now set the actual message
+        messageBodyPart.setText("Here is your export!");
+
+        // Create a multipart message
+        Multipart multipart = new MimeMultipart();
+
+        // Set text message part
+        multipart.addBodyPart(messageBodyPart);
+
+        // Part two is attachment
+        messageBodyPart = new MimeBodyPart();
+        DataSource source = new FileDataSource(path);
+        messageBodyPart.setDataHandler(new DataHandler(source));
+        messageBodyPart.setFileName(path);
+        multipart.addBodyPart(messageBodyPart);
+
+        // Send the complete message parts
+        message.setContent(multipart);
+
+		Transport.send(message);
+
+		System.out.println("Done");
 	}
 }
