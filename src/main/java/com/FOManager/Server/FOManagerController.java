@@ -67,4 +67,29 @@ public class FOManagerController {
 		
 		return new ResponseEntity<ApiResultModel<List<FOModel>>>(result, responseStatus);
 	}
+	
+	@PostMapping("api/FOManager/emailHistory")
+	ResponseEntity<ApiResultModel<String>> EmailHistory(@RequestBody ExtractOperationsModel model) {
+		ApiResultModel<String> result = new ApiResultModel<String>();
+		HttpStatus responseStatus = HttpStatus.OK;
+		
+		if (model != null) {
+			FinanceOperationActions foActions = new FinanceOperationActions();
+			try {
+			Boolean selectResult = foActions.emailHistory(model);
+			result.Success = selectResult;
+			}
+			catch(Exception ex) {
+				result.ErrorMessage = "Something went wrong!";
+				result.Result = ex.getMessage();
+				result.Success = false;
+				responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
+			}
+		} else {
+			result.ErrorMessage = "The model is empty!";
+			responseStatus = HttpStatus.BAD_REQUEST;
+		}
+		
+		return new ResponseEntity<ApiResultModel<String>>(result, responseStatus);
+	}
 }
