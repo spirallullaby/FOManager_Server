@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.mail.internet.AddressException;
 
@@ -100,5 +102,28 @@ public class UserActions {
 			e.printStackTrace();
 		}
 		return resultModel;
+	}
+	
+	public List<UserModel> GetUsers() {
+		ArrayList<UserModel> users = new ArrayList<UserModel>();
+		
+		String selectStatement = String.format("select %s, %s from %s;", DBConstants.UserTable.id,
+				DBConstants.UserTable.email_address, DBConstants.UserTable.name);
+		
+		try {
+			Connection conn = PostgreConnector.getConnection();
+			PreparedStatement statement = conn.prepareStatement(selectStatement);
+			ResultSet resultSet = statement.executeQuery();
+			
+			while (resultSet.next()) {
+				UserModel user = new UserModel();
+				user.Id = resultSet.getInt(DBConstants.UserTable.id);
+				user.EmailAddress = resultSet.getString(DBConstants.UserTable.email_address);
+				users.add(user);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return users;
 	}
 }

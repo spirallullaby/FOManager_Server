@@ -4,6 +4,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,6 +13,7 @@ import javax.crypto.spec.PBEKeySpec;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -59,9 +61,7 @@ public class UserController {
 		HttpStatus responseStatus = HttpStatus.OK;
 		
 	    Matcher mat = pattern.matcher(model.EmailAddress);
-	    if (mat.matches()) {	    
-	    	model.Password = hashPassword(model.Password, model.EmailAddress);
-
+	    if (mat.matches()) {
 	    	UserActions userActions = new UserActions();
 	    	Boolean userExists = userActions.UserWithEmailExists(model.EmailAddress);
 		
@@ -88,6 +88,12 @@ public class UserController {
 	    }
 		
 		return new ResponseEntity<ApiResultModel<UserModel>>(result, responseStatus);
+	}
+	
+	@GetMapping("api/user/all")
+	public List<UserModel> GetUsers() {
+		UserActions userActions = new UserActions();
+		return userActions.GetUsers();
 	}
 	
 
