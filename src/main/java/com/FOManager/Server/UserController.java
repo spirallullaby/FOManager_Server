@@ -68,6 +68,9 @@ public class UserController {
 	    	if (userExists) {
 	    		result.ErrorMessage = "There is already user with this email address.";
 	    		responseStatus = HttpStatus.BAD_REQUEST;
+	    	} else if (model.Password.length() < 5) {
+	    		result.ErrorMessage = "Password must contain at least 6 symbols!";
+	    		responseStatus = HttpStatus.BAD_REQUEST;
 	    	} else if (!model.Password.equals(model.RepeatPassword)) {
 	    		result.ErrorMessage = "The passwords do not match.";
 	    		responseStatus = HttpStatus.BAD_REQUEST;
