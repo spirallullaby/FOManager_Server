@@ -44,7 +44,9 @@ public class FinanceOperationActions {
 	private static final String CSV_EXTENSION = ".csv";
 
 	public Boolean InsertFO(AddFOModel model) {
-		String date = String.format("%s-%s-%s", model.Date.getYear(), model.Date.getMonth(), model.Date.getDate());
+		String testDate = model.Date.toString();
+		
+		String date = String.format("%s-%s-%s %s:%s:%s", model.Date.getYear() + 1900, model.Date.getMonth() + 1, model.Date.getDate(), model.Date.getHours(), model.Date.getMinutes(), model.Date.getSeconds());
 		String insertStatement = String.format("insert into %s (%s,%s,%s,%s) values ('%s','%s','%s','%s')",
 				DBConstants.FOTable.name, DBConstants.FOTable.user_id, DBConstants.FOTable.sum,
 				DBConstants.FOTable.description, DBConstants.FOTable.date, Integer.toString(model.UserId),

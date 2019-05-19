@@ -1,6 +1,6 @@
 package com.FOManager.Server.Models;
 
-import java.sql.Timestamp;
+import java.util.Date;
 
 public class AddFOModel {
     public int UserId;
@@ -9,5 +9,5 @@ public class AddFOModel {
 
     public String Description;
     
-    public Timestamp Date;
+    public Date Date;
 }
