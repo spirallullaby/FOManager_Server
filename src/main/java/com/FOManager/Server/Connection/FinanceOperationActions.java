@@ -67,9 +67,9 @@ public class FinanceOperationActions {
 		ArrayList<FOModel> result = new ArrayList<FOModel>();
 		try {
 			String startDate = String.format("%s-%s-%s", model.StartDate.get(Calendar.YEAR),
-					model.StartDate.get(Calendar.MONTH) + 1, model.StartDate.get(Calendar.DATE));
+					model.StartDate.get(Calendar.MONTH) + 1, model.StartDate.get(Calendar.DATE) + 1);
 			String endDate = String.format("%s-%s-%s", model.EndDate.get(Calendar.YEAR),
-					model.EndDate.get(Calendar.MONTH) + 1, model.EndDate.get(Calendar.DATE));
+					model.EndDate.get(Calendar.MONTH) + 1, model.EndDate.get(Calendar.DATE) + 1);
 			String selectStatement = String.format("SELECT * FROM %s WHERE %s=%s AND '%s'<=%s AND %s<='%s'",
 					DBConstants.FOTable.name, DBConstants.FOTable.user_id, model.UserId, startDate,
 					DBConstants.FOTable.date, DBConstants.FOTable.date, endDate);
@@ -79,7 +79,7 @@ public class FinanceOperationActions {
 			while (resultSet.next()) {
 				FOModel returnModel = new FOModel();
 				returnModel.Id = resultSet.getInt(DBConstants.FOTable.id);
-				returnModel.Sum = resultSet.getInt(DBConstants.FOTable.sum);
+				returnModel.Sum = resultSet.getDouble(DBConstants.FOTable.sum);
 
 				Calendar cal = Calendar.getInstance();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
