@@ -39,7 +39,7 @@ public class FOManagerController {
 		return new ResponseEntity<ApiResultModel<Void>>(result, responseStatus);
 	}
 
-	@GetMapping("api/FOManager/exportHistory")
+	@PostMapping("api/FOManager/exportHistory")
 	ResponseEntity<ApiResultModel<List<FOModel>>> ExportHistory(@RequestBody ExtractOperationsModel model) {
 		ApiResultModel<List<FOModel>> result = new ApiResultModel<List<FOModel>>();
 		HttpStatus responseStatus = HttpStatus.OK;
