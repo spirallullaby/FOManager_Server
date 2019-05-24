@@ -5,6 +5,7 @@ public class DBConstants {
 		public static String name = "finance_operations";
 		public static String id = "id";
 		public static String user_id = "user_id";
+		public static String type = "finance_opration_type";
 		public static String sum = "sum";
 		public static String description = "description";
 		public static String date = "date";

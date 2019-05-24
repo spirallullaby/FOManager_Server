@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,12 +45,12 @@ public class FinanceOperationActions {
 	private static final String CSV_EXTENSION = ".csv";
 
 	public Boolean InsertFO(AddFOModel model) {
-		String testDate = model.Date.toString();
-		
-		String date = String.format("%s-%s-%s %s:%s:%s", model.Date.getYear() + 1900, model.Date.getMonth() + 1, model.Date.getDate(), model.Date.getHours(), model.Date.getMinutes(), model.Date.getSeconds());
-		String insertStatement = String.format("insert into %s (%s,%s,%s,%s) values ('%s','%s','%s','%s')",
-				DBConstants.FOTable.name, DBConstants.FOTable.user_id, DBConstants.FOTable.sum,
-				DBConstants.FOTable.description, DBConstants.FOTable.date, Integer.toString(model.UserId),
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        String date = dateFormat.format(model.Date);
+		//String date = String.format("%s-%s-%s %s:%s:%s", model.Date.getYear() + 1900, model.Date.getMonth() + 1, model.Date.getDate(), model.Date.getHours(), model.Date.getMinutes(), model.Date.getSeconds());
+		String insertStatement = String.format("insert into %s (%s,%s,%s,%s,%s) values ('%s','%s','%s','%s','%s')",
+				DBConstants.FOTable.name, DBConstants.FOTable.user_id, DBConstants.FOTable.type, DBConstants.FOTable.sum,
+				DBConstants.FOTable.description, DBConstants.FOTable.date, Integer.toString(model.UserId), Integer.toString(model.Type),
 				Double.toString(model.Sum), model.Description, date);
 		try {
 			Connection conn = PostgreConnector.getConnection();
@@ -79,6 +80,8 @@ public class FinanceOperationActions {
 			while (resultSet.next()) {
 				FOModel returnModel = new FOModel();
 				returnModel.Id = resultSet.getInt(DBConstants.FOTable.id);
+				returnModel.UserId = resultSet.getInt(DBConstants.FOTable.user_id);
+				returnModel.Type = resultSet.getInt(DBConstants.FOTable.type);
 				returnModel.Sum = resultSet.getDouble(DBConstants.FOTable.sum);
 
 				Calendar cal = Calendar.getInstance();
@@ -90,7 +93,6 @@ public class FinanceOperationActions {
 
 				returnModel.Date = dateParsed;
 				returnModel.Description = resultSet.getString(DBConstants.FOTable.description);
-				returnModel.UserId = resultSet.getInt(DBConstants.FOTable.user_id);
 				result.add(returnModel);
 			}
 		} catch (SQLException e) {
@@ -117,14 +119,20 @@ public class FinanceOperationActions {
 
 		CSVWriter csvWriter = new CSVWriter(writer, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER,
 				CSVWriter.DEFAULT_ESCAPE_CHARACTER, CSVWriter.DEFAULT_LINE_END);
-		csvWriter.writeNext(new String[] { "Operation date", "Description", "Sum" });
+		csvWriter.writeNext(new String[] { "Operation date", "Description", "Income", "Expense", "Balance" });
 		double total = 0;
 		for (FOModel foModel : history) {
-			csvWriter.writeNext(
-					new String[] { foModel.Date.toString(), foModel.Description, Double.toString(foModel.Sum) });
-			total += foModel.Sum;
+			if (foModel.Type == 1) {
+				total += foModel.Sum;
+				csvWriter.writeNext(
+					new String[] { foModel.Date.toString(), foModel.Description, Double.toString(foModel.Sum), "", Double.toString(total) });
+			} else if (foModel.Type == 2) {
+				total -= foModel.Sum;
+				csvWriter.writeNext(
+					new String[] { foModel.Date.toString(), foModel.Description, "", Double.toString(foModel.Sum), Double.toString(total) });
+			}
 		}
-		csvWriter.writeNext(new String[] { "", "Total:", Double.toString(total) });
+		csvWriter.writeNext(new String[] { "", "", "", "Total:", Double.toString(total) });
 		csvWriter.close();
 		return path;
 	}

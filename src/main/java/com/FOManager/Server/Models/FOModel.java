@@ -4,6 +4,8 @@ public class FOModel{
     public int Id;
 
     public int UserId;
+    
+    public int Type;
 
     public double Sum;
 
